@@ -1,0 +1,78 @@
+version: "3.9"
+
+services:
+  orderdb:
+    image: postgres:16.4-alpine
+    container_name: ordersvc-pg
+    command: >
+      postgres
+      -c log_min_duration_statement=1000ms
+      -c log_min_error_statement=WARNING
+      -c log_min_messages=WARNING
+      -c max_connections=300
+    ports:
+      - 5432:5432
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - POSTGRES_USER=ordersvc
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_DB=orderdb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U teej4y -d orderdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  userdb:
+    image: postgres:16.4-alpine
+    container_name: usersvc-pg
+    command: >
+      postgres
+      -c log_min_duration_statement=1000ms
+      -c log_min_error_statement=WARNING
+      -c log_min_messages=WARNING
+      -c max_connections=300
+    ports:
+      - 5433:5432
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - POSTGRES_USER=usersvc
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_DB=userdb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U usersvc -d userdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+   
+  usersvc:
+    build: ./user-svc
+    container_name: usersvc
+    ports:
+      - 5051:5051
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      userdb:
+        condition: service_healthy
+
+  ordersvc:
+    build: ./order-svc/
+    container_name: ordersvc
+    ports:
+      - 5051:5051
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      orderdb:
+        condition: service_healthy
+      usersvc:
+        condition: service_started
+
+networks:
+  default:
+    name: sba

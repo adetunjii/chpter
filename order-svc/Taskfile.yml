@@ -1,0 +1,38 @@
+---
+version: 3
+
+tasks:
+  default:
+    deps: [all]
+
+  all:
+    desc: "format, build, test and lint code"
+    cmds:
+      - task: fmt
+      - task: lint
+      - task: run
+
+  fmt:
+    cmds:
+      - go fmt .
+
+  lint:
+    desc: "Run linters"
+    cmds:
+      - golangci-lint run --config=.golangci.yml
+
+  test:
+    desc: "Run unit tests"
+    cmds:
+      - go test ./...
+
+  run:
+    desc: "Run application"
+    cmds:
+      - go build -ldflags "-s -w" -o bin/order-svc
+      - ./bin/order-svc
+
+  mockgen:
+    desc: "Generate mocks"
+    cmds:
+      - go generate ./...

@@ -1,0 +1,31 @@
+---
+version: 3
+
+tasks:
+  default:
+    deps: [all]
+
+  fmt:
+    cmds:
+      - go fmt .
+
+  lint:
+    desc: "Run linters"
+    cmds:
+      - golangci-lint run --config=.golangci.yml
+
+  protogen:
+    desc: "Generate protobufs"
+    cmds: 
+      - protoc --go_out=grpc --go_opt=paths=source_relative
+        --go-grpc_out=grpc --go-grpc_opt=paths=source_relative
+        --proto_path=proto ./proto/*/*.proto
+      - go mod tidy
+
+  mockgen:
+    desc: "Generate mocks"
+    cmds:
+      - rm -rf ./grpc/mock
+      - mockgen -source=./grpc/order/service_grpc.pb.go -destination=grpc/mock/order/service.go -package=ordersvcmock
+      - mockgen -source=./grpc/user/service_grpc.pb.go -destination=grpc/mock/user/service.go -package=usersvcmock
+
