@@ -5,7 +5,6 @@ go 1.23.2
 replace github.com/chpter/shared => ../shared
 
 require (
-	github.com/chpter/shared v0.0.0-00010101000000-000000000000
 	github.com/jackc/pgx/v5 v5.7.1
 	go.uber.org/mock v0.5.0
 	google.golang.org/grpc v1.68.0

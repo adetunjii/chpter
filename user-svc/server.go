@@ -76,8 +76,8 @@ func (s *server) GetUserByID(ctx context.Context, payload *usergrpc.GetUserByIDR
 		}, nil
 	}
 
-	return &usergrpc.GetUserByIDResponse{
-		Status:  "Success",
+	resp := &usergrpc.GetUserByIDResponse{
+		Status:  "success",
 		Message: "Completed successfully",
 		Data: &usergrpc.User{
 			Id:        user.ID,
@@ -85,10 +85,18 @@ func (s *server) GetUserByID(ctx context.Context, payload *usergrpc.GetUserByIDR
 			LastName:  user.LastName,
 			Email:     user.Email,
 			Username:  user.Username,
-			CreatedAt: timestamppb.New(*user.CreatedAt),
-			UpdatedAt: timestamppb.New(*user.UpdatedAt),
 		},
-	}, nil
+	}
+
+	if user.CreatedAt != nil {
+		resp.Data.CreatedAt = timestamppb.New(*user.CreatedAt)
+	}
+
+	if user.UpdatedAt != nil {
+		resp.Data.UpdatedAt = timestamppb.New(*user.UpdatedAt)
+	}
+
+	return resp, nil
 }
 
 var (

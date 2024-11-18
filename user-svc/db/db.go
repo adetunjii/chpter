@@ -4,7 +4,6 @@ package db
 
 import (
 	"context"
-	"errors"
 
 	"github.com/chpter/user-svc/db/model"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -22,7 +21,7 @@ type Database struct {
 }
 
 func New(ctx context.Context, uri string) (*Database, error) {
-	return nil, errors.New("not implemented")
+	return nil, nil
 }
 
 var (

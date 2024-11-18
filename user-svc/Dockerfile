@@ -1,8 +1,13 @@
 FROM golang:1.23 AS build-stage
 
-WORKDIR /user-svc
+WORKDIR /app
 
-COPY go.mod go.sum ./
+COPY go.work /go.work.sum ./ 
+COPY /shared/ ./shared/
+COPY /user-svc ./user-svc
+COPY /order-svc ./order-svc
+
+WORKDIR /app/user-svc
 
 # Mount cache for go dependencies and artifacts from builds.
 RUN --mount=type=cache,target=/go/pkg/mod \
@@ -10,10 +15,8 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 
 RUN go mod download 
 
-COPY . .
-
 RUN CGO_ENABLED=0 GOOS=linux \
-    go build -ldflags "-s -w" -o /user-svc/usersvc
+    go build -ldflags "-s -w" -o /bin/usersvc
 
 FROM gcr.io/distroless/static-debian12:nonroot
 
@@ -21,7 +24,7 @@ ENV LOG_LEVEL=debug
 
 WORKDIR /app
 
-COPY --from=build-stage /user-svc/usersvc ./
+COPY --from=build-stage bin/usersvc ./
 
 # Doesn't really do anything. Only used for documentation for end user.
 # Container defaults to 5050
